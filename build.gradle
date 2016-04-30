@@ -1,0 +1,39 @@
+group 'com.ds.thop'
+version '0.1-0'
+
+apply plugin: 'application'
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile files("${System.properties['java.home']}/../lib/tools.jar")
+    compile 'com.googlecode.lanterna:lanterna:3.0.0-beta2'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+mainClassName = 'com.ds.thop.Thop'
+
+applicationDefaultJvmArgs = ["-Djava.awt.headless=true"]
+
+/* ==== work in progress =====
+task createStartScripts(type: CreateStartScripts) {
+    unixStartScriptGenerator = new CustomUnixStartScriptGenerator()
+    windowsStartScriptGenerator = new CustomWindowsStartScriptGenerator()
+}
+
+class CustomUnixStartScriptGenerator implements ScriptGenerator {
+    void generateScript(JavaAppStartScriptGenerationDetails details, Writer destination) {
+        destination.write("hello\n");
+    }
+}
+
+class CustomWindowsStartScriptGenerator implements ScriptGenerator {
+    void generateScript(JavaAppStartScriptGenerationDetails details, Writer destination) {
+        throw Exception("ok");
+    }
+} */
