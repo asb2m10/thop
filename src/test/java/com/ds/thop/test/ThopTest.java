@@ -6,7 +6,6 @@ import com.ds.thop.*;
 import java.lang.management.ManagementFactory;
 
 public class ThopTest extends TestCase {
-
     public void testThop() throws Exception {
         ActivityGenerator activity = new ActivityGenerator();
         Thread thread = new Thread(activity);
@@ -16,6 +15,4 @@ public class ThopTest extends TestCase {
         String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
         new Thop(Integer.parseInt(pid));
     }
-
-
 }

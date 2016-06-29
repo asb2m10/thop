@@ -20,6 +20,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import com.sun.management.OperatingSystemMXBean;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.management.*;
@@ -31,6 +32,7 @@ public class JvmConn {
     JMXConnector jmxc;
     ThreadMXBean mxthread;
     MemoryMXBean mxmem;
+    OperatingSystemMXBean mxos;
 
     int pid;
     String jvmName;
@@ -57,6 +59,8 @@ public class JvmConn {
         startTime = runtime.getStartTime();
         jvmName = runtime.getName();
         this.pid = pid;
+
+        mxos = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
     }
 
     public Hashtable<Long, ThreadDesc> getThreads() {
@@ -66,54 +70,61 @@ public class JvmConn {
         ThreadInfo tinfo[] = mxthread.getThreadInfo(tid, 1);
 
         for (int i = 0; i < tid.length; i++) {
-            String name = tinfo[i].getThreadName();
+            try {
+                String name = tinfo[i].getThreadName();
 
-            /** avoid listing ourselves */
-            if (name.startsWith("JMX server connection"))
-                continue;
-            if (name.startsWith("RMI TCP Connection"))
-                continue;
+                /** avoid listing ourselves */
+                if (name.startsWith("JMX server connection"))
+                    continue;
+                if (name.startsWith("RMI TCP Connection"))
+                    continue;
 
-            StackTraceElement[] st = tinfo[i].getStackTrace();
-            if (st.length > 0) {
-                String stack = st[0].toString();
+                StackTraceElement[] st = tinfo[i].getStackTrace();
+                if (st.length > 0) {
+                    String stack = st[0].toString();
 
-                /*if (stack.startsWith("TIBCO EMS TCPLink Reader"))
-                    continue;*/
+                    ThreadDesc item = new ThreadDesc();
 
-                ThreadDesc item = new ThreadDesc();
+                    item.state = tinfo[i].getThreadState();
 
-                item.state = tinfo[i].getThreadState();
+                    switch (item.state) {
+                        case WAITING:
+                        case TIMED_WAITING:
+                            stack = "WAIT";
+                            break;
+                        case BLOCKED:
+                            stack = "BLOCKED";
+                            break;
+                        default:
+                            if (stack.startsWith("java.net.PlainSocketImpl.accept") || stack.startsWith("java.net.PlainSocketImpl.socketAccept")) {
+                                stack = "SOCKET ACCEPT";
+                            } else if (stack.startsWith("java.net.SocketInputStream.socketRead")) {
+                                stack = "SOCKET READ";
+                            }
+                    }
 
-                switch (item.state) {
-                    case WAITING:
-                    case TIMED_WAITING:
-                        stack = "WAIT";
-                        break;
-                    case BLOCKED:
-                        stack = "BLOCKED";
-                        break;
-                    default:
-                        if (stack.startsWith("java.net.PlainSocketImpl.accept") || stack.startsWith("java.net.PlainSocketImpl.socketAccept")) {
-                            stack = "SOCKET ACCEPT";
-                        } else if (stack.startsWith("java.net.SocketInputStream.socketRead")) {
-                            stack = "SOCKET READ";
-                        }
+                    item.cpuTm = mxthread.getThreadCpuTime(tid[i]);
+                    item.stack = stack;
+                    item.name = name;
+                    item.id = tid[i];
+                    ret.put(tid[i], item);
                 }
-
-                item.stack = stack;
-                item.name = name;
-                item.cpuTm = mxthread.getThreadCpuTime(tid[i]);
-                item.id = tid[i];
-                ret.put(tid[i], item);
+            } catch (NullPointerException e) {
+                // on rare times, the thread that as been picked with the getThreadInfo is gone once we read it. Simply
+                // pass, and discard it.
             }
         }
+
         return ret;
     }
 
     public String getUptime() {
         long delta = System.currentTimeMillis() - startTime;
         return dateDiff(delta);
+    }
+
+    public double getProcessCpu() {
+        return mxos.getProcessCpuLoad() * 100;
     }
 
     private String dateDiff(long diff) {

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+SOURCE=`dirname ${BASH_SOURCE[0]}`
+
+thopJar=`ls $SOURCE/lib/thop*`
+lanternaJar=`ls $SOURCE/lib/lanterna*`
+
+java -cp $thopJar:$lanternaJar:$JAVA_HOME/lib/tools.jar com.ds.thop.Thop $1

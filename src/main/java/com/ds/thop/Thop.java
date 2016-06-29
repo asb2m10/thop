@@ -16,29 +16,49 @@
 
 package com.ds.thop;
 
+import java.util.concurrent.TimeUnit;
+
+import com.googlecode.lanterna.input.KeyStroke;
+
 public class Thop {
     public Thop(int pid) throws Exception {
         JvmConn conn = new JvmConn(pid);
         Snapshot snapshot = new Snapshot(conn);
-        snapshot.refresh();
+        Context ctx = new Context();
+
+        snapshot.refresh(ctx);
 
         ThopScreen screen = new ThopScreen();
 
         while (true) {
-            Thread.sleep(2000);
+            KeyStroke key = screen.inputKey.poll(ctx.interval, TimeUnit.MILLISECONDS);
+
+            synchronized (screen) {
+                if (key != null) {
+                    while (key != null) {
+                        screen.handleKeystroke(key);
+                        key = screen.pollInput();
+                    }
+                    screen.notify();
+                }
+            }
+
             try {
-                snapshot.refresh();
+                snapshot.refresh(ctx);
             } catch ( Exception e ) {
                 screen.close();
                 System.out.println("*** Unable to update JMX status");
                 e.printStackTrace();
                 System.exit(1);
             }
-            screen.refresh(snapshot);
+            screen.refresh(snapshot, ctx);
         }
     }
 
     public static void main(String args[]) {
+        /*System.setProperty("java.util.logging.SimpleFormatter.format",
+                "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");*/
+
         try {
             if ( args.length == 0 ) {
                 System.out.println("usage: java <pid>");

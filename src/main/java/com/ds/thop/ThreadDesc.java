@@ -16,20 +16,39 @@
 
 package com.ds.thop;
 
-public class ThreadDesc implements Comparable<ThreadDesc> {
-    String stack;
+public class ThreadDesc {
+    /**
+     * Name of the thread given by the program
+     */
     String name;
-    Thread.State state;
-    long id;
-    long cpuTm;
-    double cpuDelta;
-    double per;
 
-    public int compareTo(ThreadDesc o) {
-        if (cpuDelta>o.cpuDelta)
-            return -1;
-        if (cpuDelta<o.cpuDelta)
-            return 1;
-        return 0;
-    }
+    /**
+     * Current stacktrace when snapshot was taken
+     */
+    String stack;
+
+    /**
+     * Thread state (running/waiting/blocked/limbo)
+     */
+    Thread.State state;
+
+    /**
+     * Internal thread id
+     */
+    long id;
+
+    /**
+     * CPU time consumed for this thtread since start.
+     */
+    long cpuTm;
+
+    /**
+     * The delta of the cpu tm since last snapshot
+     */
+    double cpuDelta;
+
+    /**
+     * Usage percentage (calculated from cpuDelta and the interval between the last snapshot.
+     */
+    double per;
 }

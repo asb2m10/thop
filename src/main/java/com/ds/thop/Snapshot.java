@@ -18,27 +18,79 @@ package com.ds.thop;
 
 import java.lang.management.MemoryUsage;
 import java.util.*;
+import java.util.logging.*;
+import java.io.*;
 
 public class Snapshot {
+    //private static Logger logger = Logger.getLogger("thop");
+
     private JvmConn conn;
+
+    /**
+     * Memory currently used by the heap
+     */
     long heapused;
+
+    /**
+     * Maximum heap memory usage
+     */
     long heapmax;
+
+    /**
+     * Difference of the heap between the last snapshot
+     */
     long heapdelta;
 
-    int pid;
+    /**
+     * JVM Name
+     */
     String jvmName;
+    int pid;
 
+    /**
+     * Currently running threads
+     */
     Hashtable<Long, ThreadDesc> threads;
+
+    /**
+     * Thread sorted by status (BLOCKED) and CPU time
+     */
     List<ThreadDesc> activeThread;
 
+    /**
+     * Uptime of the JVM
+     */
     String uptime;
+
+    /**
+     * Time when the last snapshot was taken. We used this to determine the CPU usage.
+     */
     long lastSnapshot;
 
-    /**/
+    /**
+     *  Number of running thread
+     */
     int running;
+
+    /**
+     * Number of blocked thread
+     */
     int blocked;
+
+    /**
+     * Number of waiting threads
+     */
     int waiting;
+
+    /**
+     * CPU usage for all thread (less JMX and GC)
+     */
     double cpuPer;
+
+    /**
+     * Global CPU for the JVM
+     */
+    double cpuProcess;
 
     Snapshot(JvmConn conn) {
         this.conn = conn;
@@ -47,9 +99,19 @@ public class Snapshot {
 
         MemoryUsage memusage = conn.mxmem.getHeapMemoryUsage();
         heapmax = memusage.getMax();
+
+        /*
+        try {
+            FileHandler fh = new FileHandler("mylog.txt");
+            fh.setFormatter(new java.util.logging.SimpleFormatter());
+            //logger.removeHandler(logger.getHandlers()[0]);
+            logger.addHandler(fh);
+        } catch( IOException e) {
+
+        }*/
     }
 
-    void refresh() {
+    void refresh(Context context) {
         long tm = System.currentTimeMillis();
         Hashtable<Long, ThreadDesc> fresh = conn.getThreads();
         long deltaTm = tm - lastSnapshot;
@@ -62,13 +124,20 @@ public class Snapshot {
                 if ( threads.containsKey(i) ) {
                     double delta =  fresh.get(i).cpuTm - threads.get(i).cpuTm;
                     fresh.get(i).cpuDelta = delta;
-                    fresh.get(i).per = delta / (deltaTm * 10000);
+
+                    double per = delta / (deltaTm * 10000);
+
+                    // if this is over 100%, it's probably because the lastSnapshot was slightly delayed
+                    // and causes an (impossible) over 100% cpu
+                    if ( per > 100 )
+                        per = 99.999;
+                    fresh.get(i).per = per;
                 }
             }
         }
 
         activeThread = Collections.list(fresh.elements());
-        Collections.sort(activeThread);
+        Collections.sort(activeThread, context);
         threads = fresh;
 
         double totalCpu = 0;
@@ -100,5 +169,7 @@ public class Snapshot {
             heapdelta = curheap - heapused;
         }
         heapused = curheap;
+
+        cpuProcess = conn.getProcessCpu();
     }
 }
