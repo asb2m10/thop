@@ -19,33 +19,32 @@ package com.ds.thop;
 import java.lang.management.MemoryUsage;
 import java.util.*;
 import java.util.logging.*;
-import java.io.*;
 
 public class Snapshot {
-    //private static Logger logger = Logger.getLogger("thop");
+    private static Logger logger = Logger.getLogger("thop");
 
     private JvmConn conn;
 
     /**
      * Memory currently used by the heap
      */
-    long heapused;
+    public long heapused;
 
     /**
      * Maximum heap memory usage
      */
-    long heapmax;
+    public long heapmax;
 
     /**
      * Difference of the heap between the last snapshot
      */
-    long heapdelta;
+    public long heapdelta;
 
     /**
      * JVM Name
      */
-    String jvmName;
-    int pid;
+    public String jvmName;
+    public int pid;
 
     /**
      * Currently running threads
@@ -53,14 +52,14 @@ public class Snapshot {
     Hashtable<Long, ThreadDesc> threads;
 
     /**
-     * Thread sorted by status (BLOCKED) and CPU time
+     * Thread sorted
      */
-    List<ThreadDesc> activeThread;
+    public List<ThreadDesc> activeThread;
 
     /**
      * Uptime of the JVM
      */
-    String uptime;
+    public String uptime;
 
     /**
      * Time when the last snapshot was taken. We used this to determine the CPU usage.
@@ -70,27 +69,27 @@ public class Snapshot {
     /**
      *  Number of running thread
      */
-    int running;
+    public int running;
 
     /**
      * Number of blocked thread
      */
-    int blocked;
+    public int blocked;
 
     /**
      * Number of waiting threads
      */
-    int waiting;
+    public int waiting;
 
     /**
      * CPU usage for all thread (less JMX and GC)
      */
-    double cpuPer;
+    public  double cpuPer;
 
     /**
      * Global CPU for the JVM
      */
-    double cpuProcess;
+    public double cpuProcess;
 
     Snapshot(JvmConn conn) {
         this.conn = conn;
@@ -111,9 +110,9 @@ public class Snapshot {
         }*/
     }
 
-    void refresh(Context context) {
+    void refresh(Context context, boolean fullStack) {
         long tm = System.currentTimeMillis();
-        Hashtable<Long, ThreadDesc> fresh = conn.getThreads();
+        Hashtable<Long, ThreadDesc> fresh = conn.getThreads(fullStack);
         long deltaTm = tm - lastSnapshot;
         lastSnapshot = tm;
 

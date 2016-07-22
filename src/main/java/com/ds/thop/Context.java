@@ -24,22 +24,22 @@ public class Context implements Comparator<ThreadDesc> {
     /**
      * Interval between snapshots
      */
-    int interval = 5000;
+    public int interval = 5000;
 
     /**
      * Threads that should'nt be shown based on regex
      */
-    Pattern blacklist;
+    public Pattern blacklist;
 
     /**
      * Thread cpu usage that should not be shown (in nanoseconds)
      */
-    double cpuUsageThreshold =  200;
+    public int cpuUsageThreshold =  200;
 
-    enum SortType {
+    public enum SortType {
         cpu, name;
     }
-    SortType sorttype;
+    public SortType sorttype;
 
     public Context() throws Exception {
         sorttype = SortType.cpu;
@@ -52,7 +52,7 @@ public class Context implements Comparator<ThreadDesc> {
      * @param desc the thread to test
      * @return true if the thread must be discard
      */
-    boolean discard(ThreadDesc desc) {
+    public boolean discard(ThreadDesc desc) {
         Matcher m = blacklist.matcher(desc.name);
         if (m.find())
            return true;
@@ -89,24 +89,33 @@ public class Context implements Comparator<ThreadDesc> {
         try {
             prop.load(new FileReader(getPropertyCfg()));
 
-            interval = Integer.parseInt(prop.getProperty("interval"));
-            cpuUsageThreshold = Integer.parseInt(prop.getProperty("cpuUsageThreshold"));
-            blacklist = Pattern.compile(prop.getProperty("blacklist"));
-            String sortProp = prop.getProperty("sortType");
-            if ( sortProp.equals("cpu") )
-                sorttype = SortType.cpu;
-            else if ( sortProp.equals("name") )
-                sorttype = SortType.name;
+            String tmp = prop.getProperty("interval");
+            if ( tmp != null )
+                interval = Integer.parseInt(tmp);
+            tmp = prop.getProperty("cpuUsageThreshold");
+            if ( tmp != null )
+                cpuUsageThreshold = Integer.parseInt(tmp);
+            tmp = prop.getProperty("blacklist");
+            if ( tmp != null )
+                blacklist = Pattern.compile(tmp);
+
+            tmp = prop.getProperty("sortType");
+            if ( tmp != null ) {
+                if (tmp.equals("cpu"))
+                    sorttype = SortType.cpu;
+                else if (tmp.equals("name"))
+                    sorttype = SortType.name;
+            }
         } catch (FileNotFoundException e) {
             return;
         }
     }
 
-    public void saveContext() throws Exception {
+    public void saveContext() throws IOException {
         Properties prop = new Properties();
 
-        prop.put("interval", interval);
-        prop.put("cpuUsageThreshold", cpuUsageThreshold);
+        prop.put("interval", ""+interval);
+        prop.put("cpuUsageThreshold", ""+cpuUsageThreshold);
         prop.put("blacklist", blacklist.pattern());
         switch(sorttype) {
             case cpu :

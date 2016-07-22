@@ -63,11 +63,11 @@ public class JvmConn {
         mxos = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
     }
 
-    public Hashtable<Long, ThreadDesc> getThreads() {
+    public Hashtable<Long, ThreadDesc> getThreads(boolean fullStack) {
         Hashtable<Long, ThreadDesc> ret = new Hashtable<Long, ThreadDesc>();
 
         long tid[] = mxthread.getAllThreadIds();
-        ThreadInfo tinfo[] = mxthread.getThreadInfo(tid, 1);
+        ThreadInfo tinfo[] = mxthread.getThreadInfo(tid, fullStack ? Integer.MAX_VALUE : 1);
 
         for (int i = 0; i < tid.length; i++) {
             try {
@@ -82,9 +82,7 @@ public class JvmConn {
                 StackTraceElement[] st = tinfo[i].getStackTrace();
                 if (st.length > 0) {
                     String stack = st[0].toString();
-
                     ThreadDesc item = new ThreadDesc();
-
                     item.state = tinfo[i].getThreadState();
 
                     switch (item.state) {
@@ -104,9 +102,16 @@ public class JvmConn {
                     }
 
                     item.cpuTm = mxthread.getThreadCpuTime(tid[i]);
-                    item.stack = stack;
                     item.name = name;
                     item.id = tid[i];
+
+                    item.stack = new String[st.length];
+                    item.stack[0] = stack;
+                    if ( st.length > 1 ) {
+                        for(int j=1;j<st.length;j++) {
+                            item.stack[j] = st[j].toString();
+                        }
+                    }
                     ret.put(tid[i], item);
                 }
             } catch (NullPointerException e) {

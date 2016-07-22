@@ -18,6 +18,7 @@ package com.ds.thop;
 
 import java.util.concurrent.TimeUnit;
 
+import com.ds.thop.ui.ThopScreen;
 import com.googlecode.lanterna.input.KeyStroke;
 
 public class Thop {
@@ -26,9 +27,9 @@ public class Thop {
         Snapshot snapshot = new Snapshot(conn);
         Context ctx = new Context();
 
-        snapshot.refresh(ctx);
+        snapshot.refresh(ctx, false);
 
-        ThopScreen screen = new ThopScreen();
+        ThopScreen screen = new ThopScreen(ctx);
 
         while (true) {
             KeyStroke key = screen.inputKey.poll(ctx.interval, TimeUnit.MILLISECONDS);
@@ -36,15 +37,29 @@ public class Thop {
             synchronized (screen) {
                 if (key != null) {
                     while (key != null) {
-                        screen.handleKeystroke(key);
+                        if ( screen.handleKeystroke(key) ) {
+                            // we enter into browsing mode; we still need to block this thread for key readings
+                            screen.showSnapshotInProgress();
+
+                            try {
+                                snapshot.refresh(ctx, true);
+                            } catch ( Exception e ) {
+                                screen.close();
+                                System.out.println("*** Unable to update JMX status");
+                                e.printStackTrace();
+                                System.exit(1);
+                            }
+                            screen.enterBrowsingMode(snapshot);
+                        }
                         key = screen.pollInput();
                     }
-                    screen.notify();
                 }
+                screen.notify();
             }
 
+            screen.showSnapshotInProgress();
             try {
-                snapshot.refresh(ctx);
+                snapshot.refresh(ctx, false);
             } catch ( Exception e ) {
                 screen.close();
                 System.out.println("*** Unable to update JMX status");
@@ -56,9 +71,6 @@ public class Thop {
     }
 
     public static void main(String args[]) {
-        /*System.setProperty("java.util.logging.SimpleFormatter.format",
-                "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");*/
-
         try {
             if ( args.length == 0 ) {
                 System.out.println("usage: java <pid>");

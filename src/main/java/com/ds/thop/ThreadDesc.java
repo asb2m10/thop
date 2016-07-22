@@ -20,35 +20,35 @@ public class ThreadDesc {
     /**
      * Name of the thread given by the program
      */
-    String name;
+    public String name;
 
     /**
      * Current stacktrace when snapshot was taken
      */
-    String stack;
+    public String[] stack;
 
     /**
      * Thread state (running/waiting/blocked/limbo)
      */
-    Thread.State state;
+    public Thread.State state;
 
     /**
      * Internal thread id
      */
-    long id;
+    public long id;
 
     /**
      * CPU time consumed for this thtread since start.
      */
-    long cpuTm;
+    public long cpuTm;
 
     /**
      * The delta of the cpu tm since last snapshot
      */
-    double cpuDelta;
+    public double cpuDelta;
 
     /**
-     * Usage percentage (calculated from cpuDelta and the interval between the last snapshot.
+     * Usage percentage, calculated from cpuDelta and the interval between the last snapshot.
      */
-    double per;
+    public double per;
 }
