@@ -34,11 +34,11 @@ public class ThopDialog {
         Panel panel = new Panel();
         panel.setLayoutManager(new GridLayout(2));
 
-        panel.addComponent(new Label("Refresh Interval"));
+        panel.addComponent(new Label("Refresh interval (ms)"));
         final TextBox interval = new TextBox(new TerminalSize(30, 1), ""+ctx.interval);
         panel.addComponent(interval);
 
-        panel.addComponent(new Label("Sort Type"));
+        panel.addComponent(new Label("Sort type"));
         final ComboBox<String> sortType = new ComboBox<String>();
 
         sortType.addItem("CPU usage");
@@ -54,7 +54,7 @@ public class ThopDialog {
         final TextBox blacklist = new TextBox(new TerminalSize(30, 1), ctx.blacklist.pattern());
         panel.addComponent(blacklist);
 
-        panel.addComponent(new Label("CPU threshold"));
+        panel.addComponent(new Label("CPU threshold (ns)"));
         final TextBox threshold =  new TextBox(new TerminalSize(30, 1), ""+ctx.cpuUsageThreshold);
         panel.addComponent(threshold);
 

@@ -26,6 +26,7 @@ task createStartScripts(type: CreateStartScripts) {
     windowsStartScriptGenerator = new CustomWindowsStartScriptGenerator()
 }
 
+
 class CustomUnixStartScriptGenerator implements ScriptGenerator {
     void generateScript(JavaAppStartScriptGenerationDetails details, Writer destination) {
         destination.write("hello\n");
@@ -36,4 +37,4 @@ class CustomWindowsStartScriptGenerator implements ScriptGenerator {
     void generateScript(JavaAppStartScriptGenerationDetails details, Writer destination) {
         throw Exception("ok");
     }
-} */
+}*/

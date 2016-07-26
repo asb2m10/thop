@@ -70,7 +70,7 @@ public class Context implements Comparator<ThreadDesc> {
     public int compare(ThreadDesc t1, ThreadDesc t2) {
         switch(sorttype) {
             case cpu:
-                if (t1.state == Thread.State.BLOCKED)
+                if (t1.state == Thread.State.BLOCKED && t2.state != Thread.State.BLOCKED)
                     return -1;
                 if (t1.cpuDelta>t2.cpuDelta)
                     return -1;

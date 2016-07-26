@@ -122,7 +122,8 @@ public class ThopScreen implements Runnable {
         strSzStack = 35;
         strSzThreadName = (treminalColumns-17) - (strSzStack-1);
 
-        String strFormat = "%-" + strSzThreadName + "s %-" + strSzStack + "s";
+        String strFormat = "%-" + strSzThreadName + "." + strSzThreadName + "s %-" + strSzStack + "." +
+                strSzStack + "s";
         threadStringFormat = "%6d %7.3f " + strFormat;
     }
 
@@ -275,9 +276,7 @@ public class ThopScreen implements Runnable {
 
     public void showSnapshotInProgress() throws IOException {
         TextGraphics g =screen.newTextGraphics();
-        g.putString(3, 3, "                             ");
-        g.putString(3, 4, " *** SNAPHSOT IN PROGRESS *** ", SGR.BLINK);
-        g.putString(3, 5, "                             ");
+        g.putString(50, 0, "  *** SNAPHSOT IN PROGRESS ***  ", SGR.BLINK);
         screen.refresh();
     }
 
