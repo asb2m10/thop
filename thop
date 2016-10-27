@@ -7,7 +7,7 @@ lanternaJar=`ls $SOURCE/lib/lanterna*`
 
 toolsJar=$JAVA_HOME/lib/tools.jar
 
-if [ -f $toolsJar ]; then
+if [ ! -f $toolsJar ]; then
     echo "tools.jar not found, your JAVA_HOME must point to a JDK not a JRE"
     exit 1
 fi

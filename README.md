@@ -9,7 +9,7 @@ Use the 's' key to obtain of full thread dump (snapshot) of the JVM to enable fu
 
 Usage
 -----
-Lanterna and tools.jar (from the jdk lib directory) needs to be on the classpath. Set "thop" bash script in the root directory.
+Lanterna and tools.jar (from the jdk lib directory) needs to be on the classpath. See "thop" bash script in the root directory.
 
 ./thop [pid]
 
