@@ -9,9 +9,13 @@ Use the 's' key to obtain of full thread dump (snapshot) of the JVM to enable fu
 
 Usage
 -----
-Lanterna and tools.jar (from the jdk lib directory) needs to be on the classpath. Set "thop" bash script in the root directory
+Lanterna and tools.jar (from the jdk lib directory) needs to be on the classpath. Set "thop" bash script in the root directory.
 
 ./thop [pid]
+
+You can also use thstat that shows up the thread activity on stdout. Useful if you want to log Java thread activity without the interactive interface.
+
+./thstat [pid] > activity.log
 
 Screenshot
 ----------

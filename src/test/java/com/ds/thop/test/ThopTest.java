@@ -6,13 +6,22 @@ import com.ds.thop.*;
 import java.lang.management.ManagementFactory;
 
 public class ThopTest extends TestCase {
-    public void testThop() throws Exception {
+    int pid;
+
+    public void setUp() {
         ActivityGenerator activity = new ActivityGenerator();
         Thread thread = new Thread(activity);
         thread.setDaemon(true);
         thread.start();
+        pid = Integer.parseInt(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+    }
 
-        String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
-        new Thop(Integer.parseInt(pid));
+    public void testThop() throws Exception {
+        // This test actually is actually interactive (it open a window)
+        //new Thop(pid);
+    }
+
+    public void testThstat() throws Exception {
+        new Thstat(pid);
     }
 }

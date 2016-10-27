@@ -1,0 +1,15 @@
+#!/bin/bash
+
+SOURCE=`dirname ${BASH_SOURCE[0]}`
+
+thopJar=`ls $SOURCE/lib/thop*`
+lanternaJar=`ls $SOURCE/lib/lanterna*`
+
+toolsJar=$JAVA_HOME/lib/tools.jar
+
+if [ -f $toolsJar ]; then
+    echo "tools.jar not found, your JAVA_HOME must point to a JDK not a JRE"
+    exit 1
+fi
+
+java -cp $thopJar:$lanternaJar:$JAVA_HOME/lib/tools.jar com.ds.thop.Thstat $1
